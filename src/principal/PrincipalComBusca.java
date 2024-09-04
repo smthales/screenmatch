@@ -62,7 +62,7 @@ public class PrincipalComBusca {
             System.out.println("Algum erro de argumento na busca, verifique o endereço.");
             e.getMessage();
         } catch(ErroDeConversaoDeAnoException e) {
-            System.out.println(e.getMensagem());
+            System.out.println(e.getMessage());
         }
 
         System.out.println("Programa finalizado.");

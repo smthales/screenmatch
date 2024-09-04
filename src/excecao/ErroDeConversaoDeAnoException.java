@@ -8,8 +8,8 @@ public class ErroDeConversaoDeAnoException extends RuntimeException {
         this.mensagem = mensagem;
     }
 
-
-    public String getMensagem() {
+    @Override
+    public String getMessage() {
         return this.mensagem;
     }
 }
