@@ -4,12 +4,17 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Scanner;
+import java.util.List;
+import java.util.ArrayList;
 
 import excecao.ErroDeConversaoDeAnoException;
 import modelos.*;
@@ -36,37 +41,56 @@ public class PrincipalComBusca {
             }
         }
 
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create("https://www.omdbapi.com/?t=" + busca_formatada + "&apikey=b3e4ca26")).build();
+        List<Titulo> listaDeTitulos = new ArrayList<>();
 
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-        System.out.println(response.body());
-        String json = response.body();
         Gson gson = new GsonBuilder()
                 .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
+                .setPrettyPrinting()
                 .create();
 
-        // Titulo meuTitulo = gson.fromJson(json, Titulo.class);
-        TituloOmdb meuTituloOmdb = gson.fromJson(json, TituloOmdb.class);
-        System.out.println(meuTituloOmdb);
+        while(!busca_formatada.equalsIgnoreCase("sair")) {
 
-        try {
-            Titulo meuTitulo = new Titulo(meuTituloOmdb);
-            System.out.println("Título já convertido.");
-            System.out.println(meuTitulo);
-        } catch(NumberFormatException e) {
-            System.out.println("Ocorreu um erro na conversão.");
-            System.out.println(e.getMessage());
-        } catch(IllegalArgumentException e) {
-            System.out.println("Algum erro de argumento na busca, verifique o endereço.");
-            e.getMessage();
-        } catch(ErroDeConversaoDeAnoException e) {
-            System.out.println(e.getMessage());
+            try {
+                HttpClient client = HttpClient.newHttpClient();
+                HttpRequest request = HttpRequest.newBuilder().uri(URI.create("https://www.omdbapi.com/?t=" + busca_formatada + "&apikey=b3e4ca26")).build();
+
+                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+                System.out.println(response.body());
+                String json = response.body();
+
+                // Titulo meuTitulo = gson.fromJson(json, Titulo.class);
+                TituloOmdb meuTituloOmdb = gson.fromJson(json, TituloOmdb.class);
+                System.out.println(meuTituloOmdb);
+
+
+                Titulo meuTitulo = new Titulo(meuTituloOmdb);
+                System.out.println("Título já convertido.");
+                System.out.println(meuTitulo);
+
+                listaDeTitulos.add(meuTitulo);
+            } catch(NumberFormatException e) {
+                System.out.println("Ocorreu um erro na conversão.");
+                System.out.println(e.getMessage());
+            } catch(IllegalArgumentException e) {
+                System.out.println("Algum erro de argumento na busca, verifique o endereço.");
+                e.getMessage();
+            } catch(ErroDeConversaoDeAnoException e) {
+                System.out.println(e.getMessage());
+            }
+
+            System.out.println("Digite o nome do filme a ser buscado:");
+            busca_formatada = sc.nextLine();
+            busca_formatada = busca_formatada.replace("+", " ");
+
         }
+        System.out.println(listaDeTitulos);
+
+        FileWriter fw = new FileWriter("filmes.json");
+        fw.write(gson.toJson(listaDeTitulos));
+        fw.close();
 
         System.out.println("Programa finalizado.");
-
         sc.close();
 
     }
